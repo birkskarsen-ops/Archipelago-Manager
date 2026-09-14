@@ -236,19 +236,31 @@
             </div>
         </div>
 
-        <!-- View 3: YAML Generator -->
+       <!-- View 3: YAML Generator -->
         <div id="view-yaml" class="tab-view">
             <div class="header">
                 <h1>YAML Generator</h1>
             </div>
             <div class="card">
                 <h3>Configuration Options</h3>
-                <p style="color: var(--text-muted);">Select a supported game to generate a multiworld settings YAML file.</p>
+                <p style="color: var(--text-muted);">Configure your settings to generate a multiworld YAML file.</p>
+                
                 <div class="form-group" style="max-width: 300px; margin-top: 15px;">
-                    <label for="game-select">Select Game</label>
-                    <input type="text" id="game-select" placeholder="e.g., Ocarina of Time">
+                    <label for="yaml-player-name">Player Name</label>
+                    <input type="text" id="yaml-player-name" placeholder="e.g., AP_Player">
                 </div>
-                <button class="btn">Generate File</button>
+
+                <div class="form-group" style="max-width: 300px;">
+                    <label for="game-select">Select Game</label>
+                    <select id="game-select" style="width: 100%; padding: 10px; background-color: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border); border-radius: 4px;">
+                        <option value="Minecraft">Minecraft</option>
+                        <option value="Ocarina of Time">Ocarina of Time</option>
+                        <option value="A Link to the Past">A Link to the Past</option>
+                    </select>
+                </div>
+
+                <!-- Added onclick event to the button -->
+                <button class="btn" onclick="generateYAML()">Generate File</button>
             </div>
         </div>
 
