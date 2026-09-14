@@ -65,10 +65,21 @@
         /* Main Content */
         .main-content {
             flex: 1;
-            display: flex;
-            flex-direction: column;
             padding: 20px 40px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Tab Visibility Control */
+        .tab-view {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .tab-view.active {
+            display: flex; /* Only the active tab is shown */
         }
 
         .header {
@@ -167,51 +178,111 @@
     <!-- Sidebar Navigation -->
     <div class="sidebar">
         <h2>AP Manager</h2>
-        <button class="menu-item active">Connection</button>
-        <button class="menu-item">Game Tracker</button>
-        <button class="menu-item">YAML Generator</button>
-        <button class="menu-item">Settings</button>
+        <!-- Added onclick events to trigger the switchTab function -->
+        <button class="menu-item active" onclick="switchTab('view-connection', this)">Connection</button>
+        <button class="menu-item" onclick="switchTab('view-tracker', this)">Game Tracker</button>
+        <button class="menu-item" onclick="switchTab('view-yaml', this)">YAML Generator</button>
+        <button class="menu-item" onclick="switchTab('view-settings', this)">Settings</button>
     </div>
 
     <!-- Main Dashboard -->
     <div class="main-content">
-        <div class="header">
-            <h1>Client Connection</h1>
-            <div class="status-badge" id="connection-status">Disconnected</div>
-        </div>
+        
+        <!-- View 1: Client Connection (Active by default) -->
+        <div id="view-connection" class="tab-view active">
+            <div class="header">
+                <h1>Client Connection</h1>
+                <div class="status-badge" id="connection-status">Disconnected</div>
+            </div>
 
-        <div class="card">
-            <h3>Server Details</h3>
-            <div style="display: flex; gap: 20px;">
-                <div class="form-group" style="flex: 2;">
-                    <label for="server-address">Server Address (e.g., archipelago.gg:38281)</label>
-                    <input type="text" id="server-address" placeholder="archipelago.gg:38281">
+            <div class="card">
+                <h3>Server Details</h3>
+                <div style="display: flex; gap: 20px;">
+                    <div class="form-group" style="flex: 2;">
+                        <label for="server-address">Server Address (e.g., archipelago.gg:38281)</label>
+                        <input type="text" id="server-address" placeholder="archipelago.gg:38281">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="slot-name">Slot Name</label>
+                        <input type="text" id="slot-name" placeholder="Player1">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="password">Password (Optional)</label>
+                        <input type="password" id="password" placeholder="••••••••">
+                    </div>
                 </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="slot-name">Slot Name</label>
-                    <input type="text" id="slot-name" placeholder="Player1">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label for="password">Password (Optional)</label>
-                    <input type="password" id="password" placeholder="••••••••">
+                <button class="btn" onclick="toggleConnection()">Connect</button>
+            </div>
+
+            <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                <h3>Event Console</h3>
+                <div class="console" id="console-output">
+                    <div class="log-entry">
+                        <span class="log-time">[System]</span>
+                        <span class="log-msg">Welcome to Archipelago Manager. Ready to connect.</span>
+                    </div>
                 </div>
             </div>
-            <button class="btn" onclick="toggleConnection()">Connect</button>
         </div>
 
-        <div class="card" style="flex: 1; display: flex; flex-direction: column;">
-            <h3>Event Console</h3>
-            <div class="console" id="console-output">
-                <div class="log-entry">
-                    <span class="log-time">[System]</span>
-                    <span class="log-msg">Welcome to Archipelago Manager. Ready to connect.</span>
-                </div>
+        <!-- View 2: Game Tracker -->
+        <div id="view-tracker" class="tab-view">
+            <div class="header">
+                <h1>Game Tracker</h1>
+            </div>
+            <div class="card">
+                <h3>Inventory & Locations</h3>
+                <p style="color: var(--text-muted);">Connect to a server to display checked locations and received items here.</p>
             </div>
         </div>
+
+        <!-- View 3: YAML Generator -->
+        <div id="view-yaml" class="tab-view">
+            <div class="header">
+                <h1>YAML Generator</h1>
+            </div>
+            <div class="card">
+                <h3>Configuration Options</h3>
+                <p style="color: var(--text-muted);">Select a supported game to generate a multiworld settings YAML file.</p>
+                <div class="form-group" style="max-width: 300px; margin-top: 15px;">
+                    <label for="game-select">Select Game</label>
+                    <input type="text" id="game-select" placeholder="e.g., Ocarina of Time">
+                </div>
+                <button class="btn">Generate File</button>
+            </div>
+        </div>
+
+        <!-- View 4: Settings -->
+        <div id="view-settings" class="tab-view">
+            <div class="header">
+                <h1>Settings</h1>
+            </div>
+            <div class="card">
+                <h3>Application Preferences</h3>
+                <p style="color: var(--text-muted);">Configure local tracker paths, auto-reconnect behavior, and theme settings.</p>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Basic Logic -->
+    <!-- Scripts -->
     <script>
+        // Tab Switching Logic
+        function switchTab(tabId, clickedButton) {
+            // 1. Hide all tab views
+            const allViews = document.querySelectorAll('.tab-view');
+            allViews.forEach(view => view.classList.remove('active'));
+
+            // 2. Remove active highlighting from all sidebar buttons
+            const allButtons = document.querySelectorAll('.menu-item');
+            allButtons.forEach(btn => btn.classList.remove('active'));
+
+            // 3. Show the selected tab and highlight the clicked button
+            document.getElementById(tabId).classList.add('active');
+            clickedButton.classList.add('active');
+        }
+
+        // Connection Logic
         let isConnected = false;
 
         function logToConsole(message, type = 'log-msg') {
@@ -228,10 +299,7 @@
 
         function toggleConnection() {
             const statusBadge = document.getElementById('connection-status');
-            const btn = document.querySelector('.btn');
-            
-            // In a real app, this is where you would initialize the WebSocket 
-            // connection to the Archipelago server using archipelago.js
+            const btn = document.querySelector('#view-connection .btn');
             
             if (!isConnected) {
                 const address = document.getElementById('server-address').value;
@@ -244,7 +312,6 @@
 
                 logToConsole(`Attempting to connect to ${address} as ${slot}...`);
                 
-                // Mock connection delay
                 setTimeout(() => {
                     isConnected = true;
                     statusBadge.textContent = 'Connected';
