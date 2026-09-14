@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archipelago Manager</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --primary: #bb86fc;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #333;
+            --success: #03dac6;
+            --danger: #cf6679;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .sidebar h2 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .menu-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-main);
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(187, 134, 252, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 40px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            background-color: rgba(207, 102, 121, 0.2);
+            color: var(--danger);
+        }
+        
+        .status-badge.connected {
+            background-color: rgba(3, 218, 198, 0.2);
+            color: var(--success);
+        }
+
+        /* Forms & Cards */
+        .card {
+            background-color: var(--bg-panel);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Console */
+        .console {
+            background-color: #000;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            height: 250px;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry { margin-bottom: 5px; }
+        .log-time { color: var(--text-muted); margin-right: 10px; }
+        .log-msg { color: var(--text-main); }
+        .log-server { color: var(--success); }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>AP Manager</h2>
+        <button class="menu-item active">Connection</button>
+        <button class="menu-item">Game Tracker</button>
+        <button class="menu-item">YAML Generator</button>
+        <button class="menu-item">Settings</button>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Client Connection</h1>
+            <div class="status-badge" id="connection-status">Disconnected</div>
+        </div>
+
+        <div class="card">
+            <h3>Server Details</h3>
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 2;">
+                    <label for="server-address">Server Address (e.g., archipelago.gg:38281)</label>
+                    <input type="text" id="server-address" placeholder="archipelago.gg:38281">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="slot-name">Slot Name</label>
+                    <input type="text" id="slot-name" placeholder="Player1">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="password">Password (Optional)</label>
+                    <input type="password" id="password" placeholder="••••••••">
+                </div>
+            </div>
+            <button class="btn" onclick="toggleConnection()">Connect</button>
+        </div>
+
+        <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+            <h3>Event Console</h3>
+            <div class="console" id="console-output">
+                <div class="log-entry">
+                    <span class="log-time">[System]</span>
+                    <span class="log-msg">Welcome to Archipelago Manager. Ready to connect.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Basic Logic -->
+    <script>
+        let isConnected = false;
+
+        function logToConsole(message, type = 'log-msg') {
+            const consoleOutput = document.getElementById('console-output');
+            const time = new Date().toLocaleTimeString();
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="${type}">${message}</span>`;
+            
+            consoleOutput.appendChild(entry);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        function toggleConnection() {
+            const statusBadge = document.getElementById('connection-status');
+            const btn = document.querySelector('.btn');
+            
+            // In a real app, this is where you would initialize the WebSocket 
+            // connection to the Archipelago server using archipelago.js
+            
+            if (!isConnected) {
+                const address = document.getElementById('server-address').value;
+                const slot = document.getElementById('slot-name').value;
+                
+                if (!address || !slot) {
+                    logToConsole('Error: Server Address and Slot Name are required.', 'log-server');
+                    return;
+                }
+
+                logToConsole(`Attempting to connect to ${address} as ${slot}...`);
+                
+                // Mock connection delay
+                setTimeout(() => {
+                    isConnected = true;
+                    statusBadge.textContent = 'Connected';
+                    statusBadge.classList.add('connected');
+                    btn.textContent = 'Disconnect';
+                    btn.style.backgroundColor = 'var(--danger)';
+                    logToConsole('Successfully connected to the Archipelago server!', 'log-server');
+                }, 800);
+
+            } else {
+                isConnected = false;
+                statusBadge.textContent = 'Disconnected';
+                statusBadge.classList.remove('connected');
+                btn.textContent = 'Connect';
+                btn.style.backgroundColor = 'var(--primary)';
+                logToConsole('Disconnected from server.');
+            }
+        }
+    </script>
+</body>
+</html>
